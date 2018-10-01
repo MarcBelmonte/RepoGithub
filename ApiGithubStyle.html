@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<html lang="en">
+<head>
+    <title>This is a bootstrap example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("button").click(function(){
+                var username = $("input").val();
+                $("input").val(username);
+                console.log(username);
+                $.ajax({
+                    type: 'GET',
+                    url: "https://api.github.com/users/" +username+ "/followers",
+                    dataType: 'json',
+                    success: function(userfollowers){
+                        var followers;
+                        console.log(userfollowers);
+                        followers = userfollowers.length;
+                        console.log("Number of followers: " +followers);
+                        $(followersshow).html(`
+            <h4>Number of followers: ${followers}</h4>
+            `);
+                    },
+                    statusCode: {
+                        404: function(){
+                            alert("Username doesn't exist");
+                        }
+                    }
+                });
+                $.ajax({
+                    type: 'GET',
+                    url: "https://api.github.com/users/" +username+ "/repos",
+                    dataType: 'json',
+                    success: function(reposuser){
+                        console.log(reposuser);
+                        console.log("Length: " +reposuser.length);
+                        $("thead").html(`
+                            <tr>
+                              <th>Name</th>
+                              <th>Description</th>
+                              <th>Visit repository</th>
+                              <th>Status</th>
+                              <th>Watchers of the repo</th>
+                            </tr>
+                            `);
+                        $("tbody").html("");
+                        for(let i=0;i<reposuser.length;i++){
+                            var status;
+                            var description;
+                            if (reposuser[i].private == false){
+                                status = "Public";
+                            }
+                            else {
+                                status = "Private";
+                            }
+                            if(reposuser[i].description == null){
+                                description = "No description";
+                            }
+                            else {
+                                description = reposuser[i].description;
+                            }
+                            console.log(status);
+                            console.log(i);
+                            $("tbody").append(`
+                <tr>
+                  <td>${reposuser[i].name}</td>
+                  <td>${description}</td>
+                  <td><a target="_blank" href="${reposuser[i].html_url}">Click here!</a></td>
+                  <td>${status}</td>
+                  <td>${reposuser[i].watchers_count}</td>
+                </tr>
+              `);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron text-center">
+        <div class="page-header">
+            <h1>Github's Repository search</h1>
+            <p>Write down below an username:</p>
+            <p1>by Marc Belmonte Santacruz</p1>
+        </div>
+        <div class="form-group">
+            <label for="email">Username:</label>
+            <input type="text" name="userfield" class="form-control" id="username">
+        </div>
+        <button type="submit" id="bt_go" class="btn btn-default">GO!</button>
+        <br><br>
+        <h4 id = "followersshow"></h4>
+        <br><br>
+        <!--Let's declare our table where we'll print the repos and its parameters -->
+        <table class="table table-bordered">
+            <thead>
+            </thead>
+
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
