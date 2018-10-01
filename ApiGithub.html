@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+		<title>Github's API user</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script>
+			$(document).ready(function(){
+				$("button").click(function(){
+					
+					var username = document.getElementById("usr").value;
+					var pJson = document.getElementById("json");
+					var pResult = document.getElementById("result");
+					
+					var contentResult = "";
+					
+					var UrlJsonFollowers = "";
+
+					$.get("https://api.github.com/users/" + username + "/repos", function (data, status){
+						//pJson.innerHTML = "Data: " + JSON.stringify(data) + "\nStatus: " + status;
+						$('#json').text(JSON.stringify(data, null, 4));
+						
+						
+						var json = $.parseJSON(JSON.stringify(data));
+						for (var i=0;i<json.length;++i)
+						{
+							if (i == 0) {
+								contentResult += "<table border='1'>";
+							}
+
+							contentResult += "<tr><th colspan='2'>ID - " + json[i].id + "</th></tr><tr><td>Name</td><td>" + json[i].name + "</td></tr><tr><td>Description</td><td>" + json[i].description + "</td></tr><tr><td>Owner</td><td>" + json[i].owner.login + "</td></tr><tr><td>URL</td><td><a href='" + json[i].html_url + "' target='_blank'>" + json[i].html_url + "</a></td></tr><tr><td>Followers</td><td><a href='" + json[i].owner.followers_url + "' target='_blank'>" + json[i].owner.followers_url + "</a></td></tr>";
+							
+							UrlJsonFollowers = json[i].owner.followers_url;
+							
+							if (i == json.length-1) {
+								contentResult += "</table>";
+								
+								//$('#result').append(contentResult);
+								pResult.innerHTML = contentResult; //Lo hago así en vez de como en la línea de arriba, para que se sobreescriba los datos que hemos buscado la vez anterior
+							}
+						}
+						
+					})
+					.done(function() {
+						$.get(UrlJsonFollowers, function (data, status){
+							var jsonFollowers = $.parseJSON(JSON.stringify(data));
+							$('#result').append("<ul><li>Number of followers: " + jsonFollowers.length + "</li></ol></ul>");
+						});
+					  });
+
+				});
+			});
+		</script>
+	</head>
+	<body>
+
+		<div class="jumbotron text-center">
+			<h1>Github's User search</h1>
+			<p>Write down below an username:</p>
+		</div>
+
+		<p>Userame: <input type="text" id="usr" value="Username"></p>
+		<button>Show Value</button>
+		<!--<button type="btnsnd" class="btn btn-primary">Send</button>-->
+		
+		<br/><br/>
+		
+		<div id="result" class="jumbotron"></div>
+		
+		<pre id="json" font-family="Inconsolata"></pre>
+
+	</body>
+</html>
